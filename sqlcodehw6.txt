@@ -1,0 +1,126 @@
+CREATE TABLE Emp (
+	eid INTEGER,
+	ename STRING,
+	age INTEGER,
+	salary REAL,
+);
+
+INSERT INTO Emp
+VALUES ('1', 'John', '33', '70000.0'),
+('2', 'Zhuo', '33', '70000.0'),
+('3', 'Sid', '33', '70000.0');
+
+
+
+CREATE TABLE Works (
+	eid INTEGER,
+	did INTEGER,
+	pct_time INTEGER
+);
+
+CREATE TABLE Dept (
+	did INTEGER,
+	budget REAL,
+	manager_id INTEGER
+);
+
+1.
+SELECT E.ename, E.salary
+FROM Emp E, Works W
+WHERE W.did = 1
+UNION
+SELECT E.ename, E.salary
+FROM Emp E, Works W
+WHERE W.did = 0;
+
+OUTPUT:
+
+ename	salary
+Airy	77000
+Andy	70000
+Ang	60000
+Aron	40000
+Balaji	90000
+Bill	60000
+Bob	37000
+Bobbie	580000
+Brian	47000
+Charles	660000
+Cindy	80000
+Dave	63000
+David	60000
+Deniz	1000000
+Ding	760000
+Giles	210000
+Gusto	70000
+Henry	160000
+Herry	50000
+Jack	40000
+Jarry	40000
+John	70000
+Justin	70000
+Kasi	92000
+Kathy	69000
+Kenneth	65000
+Kim	70000
+Kiroshi	10700
+Krishna	11000
+Larry	35000
+Lee	50000
+Lisa	69000
+Marry	80000
+Mary	50000
+Mary	70000
+May	660000
+Meck	70000
+Meck	100000
+Michael	80000
+Mock	40000
+MooMoo	780000
+Mouse	890000
+Raja	100000
+Randy	40000
+Rara	780000
+Roro	90000
+Shiva	10000
+Shiva	95000
+Sid	70000
+Sonia	570000
+Steven	45000
+Suresh	89000
+Thai	45000
+Tom	20000
+Toozy	80000
+William	90000
+Wong	60000
+Yang	70000
+Zhong	90000
+Zhuo	70000
+
+
+
+2.
+SELECT E.ename, E.age, E.salary, MIN(E.age)
+FROM Emp E, Works W
+WHERE E.eid = W.eid
+GROUP BY W.did
+
+3.
+SELECT E.ename, MAX(D.budget)
+FROM Emp E, Dept D
+WHERE D.manager_id = E.eid
+
+4.
+SELECT Temp.did, MAX(Temp.avrg)
+FROM (SELECT W2.did, AVG(E.salary) AS avrg
+      FROM Works W2, Emp E
+      GROUP BY W2.did) AS Temp
+
+5.
+SELECT E.ename
+FROM Emp E
+WHERE E.salary > (SELECT E2.salary
+                      FROM Emp E2, Dept D
+                      WHERE E2.eid = D.manager_id)
+	
+

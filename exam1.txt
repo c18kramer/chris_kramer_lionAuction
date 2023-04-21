@@ -1,0 +1,11 @@
+Chapters 1-4
+
+relational diagrams
+relational algebra
+express query as relational algebra
+**will not ask you to write query in english
+write sql queries
+given a table, write a query to get an answer, report answer
+discussing various constraints, specify various constraints
+
+*might test on material not covered in class, specific textbook-only knowledge possible

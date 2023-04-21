@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Auction Listings</title>
+</head>
+<body>
+  <h1>Auction Listings</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Product Name</th>
+        <th>Product Description</th>
+        <th>Quantity</th>
+        <th>Seller Email</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ auction_listings.to_html(index=False) }}
+    </tbody>
+  </table>
+</body>
+</html>

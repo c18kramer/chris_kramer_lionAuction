@@ -1,0 +1,41 @@
+13 conceptual questions (true/false, multiple choice)
+
+specify schemas
+
+1NF, 2NF, 3NF (3 steps)
+
+come up with initial schema, then normal forms
+
+*need to understand 2NF
+
+chapter 5 (sql queries) 31pts!
+
+write sql queries and the output of them
+
+q3 = chapter 6 & 7 (true/false, short answer)
+
+total points = 105
+
+IT IS POSSIBLE TO GET FULL SCORE BY SITTING DOWN
+AND THINKING REALLY REALLY HARD YOU JUST HAVE TO THINK
+REALLY HARD AND THEN ITS SUUUPER EASY YOU CAN GET A 
+3000% PERCENT IF YOU JUST THINK, ALL YOU GOTTA DO IS
+JUST THINK AND ITS IMMEDIATE PERFECT SCORE EVERY TIME
+
+fix redundancy with normalization
+
+lossless join vs. dependency preserving
+
+functional dependency, candidate keys
+
+these topics could all be questions hint hint
+
+attribute closure vs. closure of functional dependency
+
+**most important ch6 topic: cursor
+
+understand what cursor is, where it is executed, how it is used, etc.
+
+issues we face when we want to use a database from an application, how they are connected
+
+database api vs. embedded sql

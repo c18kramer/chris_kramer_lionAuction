@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Welcome Bidder!</title>
+</head>
+<body>
+	<h1>Welcome Bidder!</h1>
+	<p>Here are your options:</p>
+	<form action="/auctions" method="POST">
+    <button type="submit">Search Auctions</button>
+    </form>
+
+	<button onclick="window.location.href='bid_history.html'">View Bids</button>
+</body>
+
+{% if search_auctions %}
+<table>
+  <thead>
+    <tr>
+      <th>Product Name</th>
+      <th>Product Description</th>
+      <th>Quantity</th>
+      <th>Seller Email</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for listing in auction_listings %}
+    <tr>
+      <td>{{ listing['Product_Name'] }}</td>
+      <td>{{ listing['Product_Description'] }}</td>
+      <td>{{ listing['Quantity'] }}</td>
+      <td>{{ listing['Seller_Email'] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+
+</html>
