@@ -4,11 +4,15 @@ import pandas as pd
 
 app = Flask(__name__)
 
+# Read in Auction_Listings.csv and create pandas dataframe
+auction_listings = pd.read_csv('Auction_Listings.csv', header=0)
+# same for categories
+categories_df = pd.read_csv('Categories.csv', header=0)
+categories = set(categories_df['category_name'].unique())
+
 with open('Address.csv', 'r') as csvfile:
     csvreader = csv.reader(csvfile)
     headers = next(csvreader)  # Extract the header row
-
-print(headers)  # Print the headers
 
 # Read in all the data tables and merge them into a single data table
 with open('Address.csv') as file:
@@ -45,7 +49,6 @@ for bidder in bidder_table:
     df = pd.DataFrame(merged_table)
 
 # Read in Auction_Listings.csv and create pandas dataframe
-auction_listings = pd.read_csv('Auction_Listings.csv', header=0)
 
 with open('Users.csv') as file:
     users_table = list(csv.DictReader(file))
@@ -77,7 +80,7 @@ def login():
                 elif option == 'seller':
                     # Redirect to the seller page
                     print("seller spotted")
-                    return redirect(url_for('/seller', email=email))
+                    return redirect(url_for('seller', email=email))
 
         # If no matching user was found, show an error message
         return render_template('login.html', error='Wrong email or password')
@@ -86,7 +89,6 @@ def login():
     return render_template('login.html')
 
 
-# Route for the bidder page
 @app.route('/bidder', methods=['GET', 'POST'])
 def bidder():
     if request.method == 'POST' and 'search' in request.form:
@@ -95,17 +97,22 @@ def bidder():
     else:
         email = request.args.get('email')
         bidder_info = df.loc[df['ï»¿email'] == email]
-        return render_template('bidder.html', bidder_info=bidder_info.to_html(index=False), email=email)
+        bidder_info = pd.DataFrame(bidder_info)
+        bidder_info_html = bidder_info.to_html(index=False)  # call to_html() on the DataFrame
+        return render_template('bidder.html', bidder_info=bidder_info_html, email=email)
 
 
 @app.route('/auctions', methods=['GET', 'POST'])
 def auctions():
     if request.method == 'POST':
-        # handle form submission here
-        return render_template('auctions.html', auctions=auction_listings.to_dict('records'))
+        selected_category = request.form.get('category')
+        if selected_category == 'All':
+            filtered_auctions = auction_listings
+        else:
+            filtered_auctions = auction_listings.loc[auction_listings['Category'] == selected_category]
+        return render_template('auctions.html', auction_listings=filtered_auctions, categories=categories)
     else:
-        # display the auctions page
-        return render_template('auctions.html', auctions=auction_listings.to_dict('records'))
+        return render_template('auctions.html', auction_listings=auction_listings, categories=categories)
 
 
 # Route for the seller page
@@ -113,6 +120,31 @@ def auctions():
 def seller(email):
     # Add your code here to show the seller page
     return "Seller page"
+
+
+@app.route('/')
+def index():
+    # Load data from CSV files
+    categories = pd.read_csv('Categories.csv')['Category'].tolist()
+    auction_listings = pd.read_csv('AuctionListings.csv')
+
+    # Render the template with the data
+    return render_template('auctions.html', auction_listings=auction_listings.to_dict('records'), categories=categories)
+
+
+@app.route('/', methods=['POST'])
+def filter():
+    # Load data from CSV files
+    categories = pd.read_csv('Categories.csv')['Category'].tolist()
+    auction_listings = pd.read_csv('AuctionListings.csv')
+
+    # Get the selected category from the form data
+    category = request.form['category']
+
+    # Render the template with the filtered data
+    return render_template('auctions.html',
+                           auction_listings=auction_listings[auction_listings['Category'] == category].to_dict(
+                               'records'), categories=categories, category=category)
 
 
 if __name__ == '__main__':

@@ -5,6 +5,15 @@
 </head>
 <body>
   <h1>Auction Listings</h1>
+  <form method="POST">
+    <select name="category">
+      <option value="All">All</option>
+      {% for category in categories %}
+      <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
+      {% endfor %}
+    </select>
+    <input type="submit" name="filter" value="Filter">
+  </form>
   <table>
     <thead>
       <tr>
@@ -15,7 +24,16 @@
       </tr>
     </thead>
     <tbody>
-      {{ auction_listings.to_html(index=False) }}
+      {% for listing in auction_listings %}
+      {% if selected_category == 'All' or selected_category == listing['Category'] %}
+      <tr>
+        <td>{{ listing['Product Name'] }}</td>
+        <td>{{ listing['Product Description'] }}</td>
+        <td>{{ listing['Quantity'] }}</td>
+        <td>{{ listing['Seller Email'] }}</td>
+      </tr>
+      {% endif %}
+      {% endfor %}
     </tbody>
   </table>
 </body>
