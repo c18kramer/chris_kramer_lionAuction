@@ -106,13 +106,18 @@ def bidder():
 def auctions():
     if request.method == 'POST':
         selected_category = request.form.get('category')
+        print(selected_category)
         if selected_category == 'All':
             filtered_auctions = auction_listings
         else:
-            filtered_auctions = auction_listings.loc[auction_listings['Category'] == selected_category]
-        return render_template('auctions.html', auction_listings=filtered_auctions, categories=categories)
+            filtered_auctions = auction_listings[auction_listings['Category'] == selected_category]
+
+        print(filtered_auctions)
+
+        return render_template('auctions.html', auction_listings=filtered_auctions.to_dict('records'), categories=categories)
     else:
         return render_template('auctions.html', auction_listings=auction_listings, categories=categories)
+
 
 
 # Route for the seller page

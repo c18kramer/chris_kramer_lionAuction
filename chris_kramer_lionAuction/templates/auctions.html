@@ -1,40 +1,41 @@
+<form method="POST" action="{{ url_for('auctions') }}">
+
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Auction Listings</title>
+    <title>Auction Listings</title>
 </head>
 <body>
-  <h1>Auction Listings</h1>
-  <form method="POST">
+<h1>Auction Listings</h1>
+<form method="POST">
     <select name="category">
-      <option value="All">All</option>
-      {% for category in categories %}
-      <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
-      {% endfor %}
+        <option value="All">All</option>
+        {% for category in categories %}
+            <option value="{{ category }}"
+                    {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
+        {% endfor %}
     </select>
     <input type="submit" name="filter" value="Filter">
-  </form>
-  <table>
+</form>
+<table class = "table table-bordered">
     <thead>
-      <tr>
+    <tr>
         <th>Product Name</th>
         <th>Product Description</th>
         <th>Quantity</th>
         <th>Seller Email</th>
-      </tr>
+    </tr>
     </thead>
     <tbody>
-      {% for listing in auction_listings %}
-      {% if selected_category == 'All' or selected_category == listing['Category'] %}
-      <tr>
-        <td>{{ listing['Product Name'] }}</td>
-        <td>{{ listing['Product Description'] }}</td>
-        <td>{{ listing['Quantity'] }}</td>
-        <td>{{ listing['Seller Email'] }}</td>
-      </tr>
-      {% endif %}
-      {% endfor %}
+    {% for listing in auction_listings %}
+        <tr>
+            <td>{{ listing['Product_Name'] }}</td>
+            <td>{{ listing['Product_Description'] }}</td>
+            <td>{{ listing['Quantity'] }}</td>
+            <td>{{ listing['Seller_Email'] }}</td>
+        </tr>
+    {% endfor %}
     </tbody>
-  </table>
+</table>
 </body>
 </html>
