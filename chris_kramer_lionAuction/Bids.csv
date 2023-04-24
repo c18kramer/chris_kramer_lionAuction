@@ -186,4 +186,5 @@ Bid_ID,Seller_Email,Listing_ID,Bidder_Email,Bid_Price
 900,rgoulbornegn@lsu.edu,499.0,msalvatore3m@lsu.edu,153
 999,seller_email,,tdoveston1@nsu.edu,100
 999,seller_email,747.0,tdoveston1@nsu.edu,100
-999,seller_email,747,tdoveston1@nsu.edu,101
+999,seller_email,747.0,tdoveston1@nsu.edu,101
+999,"Series([], Name: Seller_Email, dtype: object)",717,tdoveston1@nsu.edu,36
