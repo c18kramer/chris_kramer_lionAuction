@@ -7,6 +7,8 @@ import bcrypt
 
 # starting flask app
 app = Flask(__name__)
+# create the secret key
+app.secret_key = "secretkey123"
 
 # Read in Auction_Listings.csv and create pandas dataframe
 auction_listings = pd.read_csv('Auction_Listings.csv', header=0)
@@ -258,6 +260,14 @@ def view_user_bids():
     user_bids_df = bids_df[bids_df['Bidder_Email'] == email]
     user_bids = user_bids_df.to_dict('records')
     return render_template('bid_history.html', user_bids=user_bids)
+
+
+# this route is meant to display the account information of the signed in user
+@app.route('/account')
+def account():
+    email = session['email'] # session email /= stored email
+    account_info = df[df['ï»¿email'] == email]
+    return render_template('account.html', account_info=account_info) # the email inconsistency makes this not work
 
 
 # running the main file
