@@ -1,14 +1,20 @@
 import csv
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import pandas as pd
+import math
 
 app = Flask(__name__)
+app.secret_key = 'secretkey123'
 
 # Read in Auction_Listings.csv and create pandas dataframe
 auction_listings = pd.read_csv('Auction_Listings.csv', header=0)
 # same for categories
 categories_df = pd.read_csv('Categories.csv', header=0)
 categories = set(categories_df['category_name'].unique())
+# read in the bidding history
+bids_df = pd.read_csv("Bids.csv", header=0)
+# read in the seller data so that we can log in as a seller as well
+seller_df = pd.read_csv("Sellers.csv", header=0)
 
 with open('Address.csv', 'r') as csvfile:
     csvreader = csv.reader(csvfile)
@@ -72,6 +78,8 @@ def login():
         for user in users_table:
             if user['ï»¿email'] == email and user['password'] == hash_password(password):
                 print("true dat")
+                session['email'] = email
+                flash('Logged in successfully.', 'success')
                 if option == 'bidder':
                     # Redirect to the bidder page
                     print("bidder spotted")
@@ -114,10 +122,10 @@ def auctions():
 
         print(filtered_auctions)
 
-        return render_template('auctions.html', auction_listings=filtered_auctions.to_dict('records'), categories=categories)
+        return render_template('auctions.html', auction_listings=filtered_auctions.to_dict('records'),
+                               categories=categories)
     else:
         return render_template('auctions.html', auction_listings=auction_listings, categories=categories)
-
 
 
 # Route for the seller page
@@ -127,29 +135,91 @@ def seller(email):
     return "Seller page"
 
 
-@app.route('/')
-def index():
-    # Load data from CSV files
-    categories = pd.read_csv('Categories.csv')['Category'].tolist()
-    auction_listings = pd.read_csv('AuctionListings.csv')
+@app.route('/item/<int:listing_id>')
+def item(listing_id):
+    # Filter the auction_listings dataframe to extract the relevant information
+    auction = auction_listings.loc[auction_listings['Listing_ID'] == listing_id].iloc[0]
 
-    # Render the template with the data
-    return render_template('auctions.html', auction_listings=auction_listings.to_dict('records'), categories=categories)
+    if listing_id in bids_df['Listing_ID'].values:
+
+        # find the highest bid for the selected item
+        highest_bid_price = 0
+        for index, row in bids_df.iterrows():
+            if row['Listing_ID'] == listing_id and row['Bid_Price'] > highest_bid_price:
+                highest_bid_price = row['Bid_Price']
+                bidder_email = row['Bidder_Email']
+
+        current_bid = highest_bid_price
+
+    else:
+        print("Listing_ID is not found in the bids_df dataset.")
+        bidder_email = "No Bidder"
+        current_bid = 0
+
+    # Extract the relevant information for the item
+    product_name = auction['Product_Name']
+    product_description = auction['Product_Description']
+    quantity = auction['Quantity']
+    seller_email = auction['Seller_Email']
+
+    # Render the item.html template with the relevant information
+    return render_template('item.html', product_name=product_name, product_description=product_description,
+                           quantity=quantity, seller_email=seller_email, bidder_email=bidder_email,
+                           current_bid=current_bid, listing_id=listing_id)
 
 
-@app.route('/', methods=['POST'])
-def filter():
-    # Load data from CSV files
-    categories = pd.read_csv('Categories.csv')['Category'].tolist()
-    auction_listings = pd.read_csv('AuctionListings.csv')
+@app.route('/submit_bid', methods=['POST'])
+def submit_bid():
+    listing_id = request.form['listing_id']
+    bid_amount = int(request.form['bid_amount'])
+    bidder_email = session['email']
+    global bids_df
+    # get the auction they are bidding on so we can abstract relevant information
+    #auction = auction_listings.loc[auction_listings['Listing_ID'] == listing_id].iloc[0]
 
-    # Get the selected category from the form data
-    category = request.form['category']
+    # Check if user is the current highest bidder
+    current_bid = bids_df.loc[bids_df['Listing_ID'] == listing_id]['Bid_Price'].max()
+    print(current_bid)
+    print(bids_df['Bidder_Email'])
+    print(bids_df.shape[1])
+    #seller_email = auction['Seller_Email']
+    if math.isnan(current_bid) or bids_df['Bidder_Email'].empty:
+        print("No Bids on this item")
+        # Add new bid to bids_df
+        bids_df.loc[len(bids_df.index)] = [999, "seller_email", listing_id, bidder_email, bid_amount]
+        # Save the new bid to a CSV file
+        bids_df.to_csv('bids.csv', index=False)
 
-    # Render the template with the filtered data
-    return render_template('auctions.html',
-                           auction_listings=auction_listings[auction_listings['Category'] == category].to_dict(
-                               'records'), categories=categories, category=category)
+        flash('Your bid has been submitted!', 'success')
+        return redirect(url_for('item', listing_id=listing_id))
+
+    else:
+        print("There are bids on this item")
+        current_highest_bidder = bids_df.loc[bids_df['Bid_Price'] == current_bid]['Bidder_Email'].values[0]
+        if bidder_email == current_highest_bidder:
+            flash('You are already the highest bidder for this item!', 'danger')
+            return redirect(url_for('item', listing_id=listing_id))
+        elif bid_amount <= current_bid:
+            flash('Bid amount must be at least 1 unit higher than the current highest bid!', 'danger')
+            return redirect(url_for('item', listing_id=listing_id))
+        elif bid_amount > current_bid:
+            # Add new bid to bids_df
+            bids_df.loc[len(bids_df.index)] = [999, "seller_email", listing_id, bidder_email, bid_amount]
+            # Save the new bid to a CSV file
+            bids_df.to_csv('bids.csv', index=False)
+
+            flash('Your bid has been submitted!', 'success')
+            return redirect(url_for('item', listing_id=listing_id))
+
+
+# view the bids the user has placed
+@app.route('/view_user_bids', methods=['GET', 'POST'])
+def view_user_bids():
+    email = session.get('email')
+    user_bids_df = bids_df[bids_df['Bidder_Email'] == email]
+    user_bids = user_bids_df.to_dict('records')
+    return render_template('bid_history.html', user_bids=user_bids)
+
 
 
 if __name__ == '__main__':

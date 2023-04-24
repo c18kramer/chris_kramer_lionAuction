@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ product_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .auction-details {
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .auction-details h1 {
+            font-size: 36px;
+            margin: 0 0 20px 0;
+        }
+
+        .auction-details p {
+            font-size: 18px;
+            margin: 0 0 10px 0;
+        }
+
+        .auction-details .seller-email {
+            color: #777;
+        }
+
+        .back-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .back-btn:hover {
+            background-color: #3e8e41;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="auction-details">
+        <h1>{{ product_name }}</h1>
+        <p>{{ product_description }}</p>
+        <p><strong>Quantity:</strong> {{ quantity }}</p>
+        <p class="seller-email"><strong>Seller Email:</strong> {{ seller_email }}</p>
+    </div>
+    <button class="back-btn" onclick="window.history.back()">Back to Auctions</button>
+</div>
+
+<h2>Current Highest Bid</h2>
+<table>
+    <tr>
+        <th>Bidder Email</th>
+        <th>Current Bid</th>
+    </tr>
+    <tr>
+        <td>{{ bidder_email }}</td>
+        <td>{{ current_bid }}</td>
+    </tr>
+</table>
+
+<h2>Bid on Item</h2>
+<form method="POST" action="{{ url_for('submit_bid') }}">
+    <input type="hidden" name="listing_id" value="{{ listing_id }}">
+    <label for="bid_amount">Enter Bid Amount:</label>
+    <input type="number" name="bid_amount" id="bid_amount" min="{{ current_bid + 1 }}" required>
+    <br><br>
+    <input type="submit" name="submit_bid" value="Submit Bid">
+</form>
+
+
+</body>
+</html>

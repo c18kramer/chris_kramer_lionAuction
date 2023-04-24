@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bid History</title>
+     <style>
+      /* Center the main container and give it a max width */
+      .container {
+        margin: auto;
+        max-width: 800px;
+      }
+
+      /* Add some padding to the top and bottom of the container */
+      .container > * {
+        padding-top: 20px;
+        padding-bottom: 20px;
+      }
+
+      /* Style the table */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th, td {
+        text-align: center;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #f2f2f2;
+        color: #555;
+      }
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+
+      /* Style the back button */
+      .back-button {
+        display: inline-block;
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        margin-top: 20px;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+      .back-button:hover {
+        background-color: #3e8e41;
+      }
+    </style>
+</head>
+<body>
+    <h1>Bid History</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Listing ID</th>
+                <th>Bid Amount</th>
+                <th>Bidder Email</th>
+                <th>Seller Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bid in user_bids %}
+            <tr>
+                <td>{{ bid.Listing_ID }}</td>
+                <td>{{ bid.Bid_Price }}</td>
+                <td>{{ bid.Bidder_Email }}</td>
+                <td>{{ bid.Seller_Email }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

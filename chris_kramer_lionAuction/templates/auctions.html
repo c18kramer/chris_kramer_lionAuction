@@ -1,41 +1,69 @@
-<form method="POST" action="{{ url_for('auctions') }}">
-
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Auction Listings</title>
+  <title>Auction Listings</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #04AA6D;
+      color: white;
+    }
+    td button {
+      background-color: #04AA6D;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    td button:hover {
+      background-color: #3e8e41;
+    }
+  </style>
 </head>
 <body>
-<h1>Auction Listings</h1>
-<form method="POST">
+  <h1>Auction Listings</h1>
+  <form method="POST">
     <select name="category">
-        <option value="All">All</option>
-        {% for category in categories %}
-            <option value="{{ category }}"
-                    {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
-        {% endfor %}
+      <option value="All">All</option>
+      {% for category in categories %}
+      <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
+      {% endfor %}
     </select>
     <input type="submit" name="filter" value="Filter">
-</form>
-<table class = "table table-bordered">
+  </form>
+  <table>
     <thead>
-    <tr>
+      <tr>
         <th>Product Name</th>
         <th>Product Description</th>
         <th>Quantity</th>
         <th>Seller Email</th>
-    </tr>
+        <th>Action</th>
+      </tr>
     </thead>
     <tbody>
-    {% for listing in auction_listings %}
-        <tr>
-            <td>{{ listing['Product_Name'] }}</td>
-            <td>{{ listing['Product_Description'] }}</td>
-            <td>{{ listing['Quantity'] }}</td>
-            <td>{{ listing['Seller_Email'] }}</td>
-        </tr>
-    {% endfor %}
+      {% for listing in auction_listings %}
+      <tr>
+        <td>{{ listing['Product_Name'] }}</td>
+        <td>{{ listing['Product_Description'] }}</td>
+        <td>{{ listing['Quantity'] }}</td>
+        <td>{{ listing['Seller_Email'] }}</td>
+        <td><a href="/item/{{ listing['Listing_ID'] }}"><button>Go to Auction</button></a></td>
+      </tr>
+      {% endfor %}
     </tbody>
-</table>
+  </table>
 </body>
 </html>
