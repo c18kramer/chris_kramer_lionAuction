@@ -2,6 +2,7 @@ import csv
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import pandas as pd
 import math
+import hashlib
 
 app = Flask(__name__)
 app.secret_key = 'secretkey123'
@@ -13,8 +14,6 @@ categories_df = pd.read_csv('Categories.csv', header=0)
 categories = set(categories_df['category_name'].unique())
 # read in the bidding history
 bids_df = pd.read_csv("Bids.csv", header=0)
-# read in the seller data so that we can log in as a seller as well
-seller_df = pd.read_csv("Sellers.csv", header=0)
 
 with open('Address.csv', 'r') as csvfile:
     csvreader = csv.reader(csvfile)
@@ -51,18 +50,21 @@ for bidder in bidder_table:
 
     merged_table.append(merged_row)
 
-    # turn it into a pandas dataframe
-    df = pd.DataFrame(merged_table)
+# turn it into a pandas dataframe
+df = pd.DataFrame(merged_table)
 
 # Read in Auction_Listings.csv and create pandas dataframe
 
 with open('Users.csv') as file:
     users_table = list(csv.DictReader(file))
 
+# read in the seller data so that we can log in as a seller as well
+with open('Sellers.csv') as file:
+    sellers_table = list(csv.DictReader(file))
+
 
 # Helper function to securely hash the passwords
 def hash_password(password):
-    # Add your secure password hashing code here
     return password
 
 
@@ -74,19 +76,25 @@ def login():
         password = request.form['password']
         option = request.form['type']
 
-        # Check if the email and password match a user in the users table
-        for user in users_table:
-            if user['ï»¿email'] == email and user['password'] == hash_password(password):
-                print("true dat")
-                session['email'] = email
-                flash('Logged in successfully.', 'success')
-                if option == 'bidder':
-                    # Redirect to the bidder page
+        if option == 'bidder':
+            # Check if the email and password match a user in the users table
+            for user in users_table:
+                if user['ï»¿email'] == email and user['password'] == hash_password(password):
+                    print("true dat")
+                    session['email'] = email
+                    flash('Logged in successfully.', 'success')
                     print("bidder spotted")
                     return redirect(url_for('bidder', email=email))
 
-                elif option == 'seller':
-                    # Redirect to the seller page
+        # when checking for seller, we don't look for the email in the sellers.csv file because the emails are all different
+        # some are similar, but have a different @ address, so we cannot match them up
+        elif option == 'seller':
+            # Redirect to the seller page
+            for user in sellers_table:
+                if user['ï»¿email'] == email:
+                    print("got em")
+                    session['email'] = email
+                    flash('Logged in successfully.', 'success')
                     print("seller spotted")
                     return redirect(url_for('seller', email=email))
 
@@ -104,7 +112,7 @@ def bidder():
             ['Product_Name', 'Product_Description', 'Quantity', 'Seller_Email']])
     else:
         email = request.args.get('email')
-        bidder_info = df.loc[df['ï»¿email'] == email]
+        bidder_info = df.loc[df['Owner_Email'] == email]
         bidder_info = pd.DataFrame(bidder_info)
         bidder_info_html = bidder_info.to_html(index=False)  # call to_html() on the DataFrame
         return render_template('bidder.html', bidder_info=bidder_info_html, email=email)
@@ -129,10 +137,28 @@ def auctions():
 
 
 # Route for the seller page
-@app.route('/seller/<email>')
+@app.route('/seller/<email>', methods=['GET', 'POST'])
 def seller(email):
-    # Add your code here to show the seller page
-    return "Seller page"
+    # Get the seller's email from the session
+    seller_email = session['email']
+
+    # Get the seller's information from merged_table using their email
+    seller_info = df[df['ï»¿email'] == seller_email]
+    print(seller_info)
+    print(df['ï»¿email'])
+    print(seller_email)
+
+    # Get all the auctions from auction_listings with the seller's email
+    seller_auctions = auction_listings[auction_listings['Seller_Email'] == seller_email]
+
+    if request.method == 'POST':
+        listing_id = request.form['listing_id']
+        print(listing_id)
+        auction_listings.loc[auction_listings['Listing_ID'] == int(listing_id), 'Product_Description'] = 'AUCTION REMOVED'
+        return redirect(url_for('seller', email=seller_email))
+
+    # Render the seller.html template with the seller's information and auctions
+    return render_template('seller.html', seller_info=seller_info.to_dict('records'), seller_auctions=seller_auctions.to_dict('records'))
 
 
 @app.route('/item/<int:listing_id>')
@@ -175,14 +201,14 @@ def submit_bid():
     bidder_email = session['email']
     global bids_df
     # get the auction they are bidding on so we can abstract relevant information
-    #auction = auction_listings.loc[auction_listings['Listing_ID'] == listing_id].iloc[0]
+    # auction = auction_listings.loc[auction_listings['Listing_ID'] == listing_id].iloc[0]
 
     # Check if user is the current highest bidder
     current_bid = bids_df.loc[bids_df['Listing_ID'] == listing_id]['Bid_Price'].max()
     print(current_bid)
     print(bids_df['Bidder_Email'])
     print(bids_df.shape[1])
-    #seller_email = auction['Seller_Email']
+    # seller_email = auction['Seller_Email']
     if math.isnan(current_bid) or bids_df['Bidder_Email'].empty:
         print("No Bids on this item")
         # Add new bid to bids_df
@@ -219,7 +245,6 @@ def view_user_bids():
     user_bids_df = bids_df[bids_df['Bidder_Email'] == email]
     user_bids = user_bids_df.to_dict('records')
     return render_template('bid_history.html', user_bids=user_bids)
-
 
 
 if __name__ == '__main__':

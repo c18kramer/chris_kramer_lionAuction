@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome Seller!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+            width: 80%;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Welcome Seller!</h1>
+</header>
+
+<div class="container">
+    <h2>Your Information</h2>
+    {% if seller_info %}
+        <table>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>City</th>
+            </tr>
+            {% for info in seller_info %}
+                <tr>
+                    <td>{{ info['first_name'] }}</td>
+                    <td>{{ info['last_name'] }}</td>
+                    <td>{{ info['ï»¿email'] }}</td>
+                    <td>{{ info['city'] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>You have no info.</p>
+    {% endif %}
+
+    <h2>Your Auctions</h2>
+    {% if seller_auctions %}
+        <table>
+            <tr>
+                <th>Product Name</th>
+                <th>Product Description</th>
+                <th>Quantity</th>
+                <th>Status</th>
+            </tr>
+            {% for auction in seller_auctions %}
+                <tr>
+                    <td>{{ auction['Product_Name'] }}</td>
+                    <td>{{ auction['Product_Description'] }}</td>
+                    <td>{{ auction['Quantity'] }}</td>
+                    <td>{{ auction['Status'] }}</td>
+                    <td><form action="/seller/<email>" method="POST">
+                    <input type="hidden" name="listing_id" value="{{auction['Listing_ID']}}">
+                    <button type="submit">Remove Listing</button>
+                </form></td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>You have no active auctions.</p>
+    {% endif %}
+</div>
+
+</body>
+</html>
